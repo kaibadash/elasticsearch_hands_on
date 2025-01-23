@@ -1,5 +1,6 @@
 # books index 作成(RDB でいうテーブルのようなもの)
 
+DELETE /books
 PUT /books
 {
   "settings": {
@@ -20,69 +21,62 @@ PUT /books
     }
   },
   "mappings": {
-    "books": {
-      "dynamic_templates": [
-        {
-          "ja_string": {
-            "match_mapping_type": "string",
-            "match": "*_ja",
-            "mapping": {
-              "type": "text",
-              "analyzer": "ja_analyzer"
-            }
-          }
-        },
-        {
-          "yomi_string": {
-            "match_mapping_type": "string",
-            "match": "*_suggestion",
-            "mapping": {
-              "type": "completion"
-            }
-          }
-        }
-      ],
-      "properties": {
-        "title": {
-          "type": "text",
-          "copy_to": ["title_ja", "title_suggestion"]
-        },
-        "title_ja": {
-          "type": "text",
-          "store": true
-        },
-        "title_yomi": {
-          "type": "text",
-          "copy_to": ["title_yomi_suggestion"]
-        },
-        "author": {
-          "type": "text",
-          "copy_to": ["author_ja", "author_suggestion"]
-        },
-        "author_ja": {
-          "type": "text",
-          "store": true
-        },
-        "author_yomi": {
-          "type": "text",
-          "copy_to": ["author_yomi_suggestion"]
-        }
+    "properties": {
+      "title": {
+        "type": "text",
+        "copy_to": [
+          "title_ja",
+          "title_suggestion"
+        ]
+      },
+      "title_ja": {
+        "type": "text",
+        "analyzer": "ja_analyzer"
+      },
+      "title_yomi": {
+        "type": "text",
+        "copy_to": [
+          "title_yomi_suggestion"
+        ]
+      },
+      "author": {
+        "type": "text",
+        "copy_to": [
+          "author_ja",
+          "author_suggestion"
+        ]
+      },
+      "author_ja": {
+        "type": "text",
+        "analyzer": "ja_analyzer",
+        "search_analyzer": "ja_analyzer"
+      },
+      "author_yomi": {
+        "type": "text",
+        "copy_to": [
+          "author_yomi_suggestion"
+        ]
       }
     }
   }
+}
+GET /books/_analyze
+{
+  "field": "title_ja",
+  "text": "京都府"
 }
 
 
 # books document 挿入(RDB でいうレコード)
 
-PUT /books/1
+PUT /books/_doc/1
 {
   "title": "吾輩は猫である",
   "author": "夏目漱石",
   "title_yomi": "わがはいはねこである",
   "author_yomi": "なつめそうせき"
 }
-PUT /books/2
+PUT /books/_doc/2
 {
   "title": "とある科学の超電磁砲",
   "author": "鎌池和馬",
@@ -90,15 +84,15 @@ PUT /books/2
   "author_yomi": "かまちかずま"
 }
 
-PUT /books/3
+PUT /books/_doc/3
 {
   "title": "頭文字D",
   "author": "しげの秀一",
-  "title_yomi": "イニシャルディー",
+  "title_yomi": "いにしゃるでぃー",
   "author_yomi": "しげのしゅういち"
 }
 
-PUT /books/4
+PUT /books/_doc/4
 {
   "title": "東京都府中市の歴史",
   "author": "府中市教育委員会",
@@ -106,14 +100,14 @@ PUT /books/4
   "author_yomi": "ふちゅうしきょういくいいんかい"
 }
 
-PUT /books/5
+PUT /books/_doc/5
 {
   "title": "とある京都府中京警察署の成果２０２４",
   "author": "不明",
   "title_yomi": "とあるきょうとふなかぎょうけいさつしょのせいか２０２４",
   "author_yomi": "ふめい"
 }
-PUT /books/6
+PUT /books/_doc/6
 {
   "title": "ドラゴンクエスト3攻略本 そしてとある伝説へ",
   "author": "鳥山明日",
@@ -128,21 +122,45 @@ PUT /books/6
 POST /books/_search
 {
   "query": {
-    "match": "猫"
+    "match": {
+      "title": "猫"
+    }
   }
 }
 POST /books/_search
 {
   "query": {
-    "match": "レールガン"
+    "match": {
+      "title_yomi": "ねこ"
+    }
+  }
+}
+
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title": "京都府"
+    }
   }
 }
 POST /books/_search
 {
   "query": {
-    "match": "京都"
+    "match": {
+      "title_ja": "京都府"
+    }
   }
 }
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title_ja": "府中"
+    }
+  }
+}
+
 
 # 検索: AND
 POST /books/_search
@@ -152,12 +170,12 @@ POST /books/_search
       "must": [
         {
           "match": {
-            "title_yomi": "とある"
+            "title": "とある"
           }
         },
         {
           "match": {
-            "author_yomi": "かまち"
+            "author": "鎌池"
           }
         }
       ]
@@ -173,12 +191,12 @@ POST /books/_search
       "should": [
         {
           "match": {
-            "title_yomi": "とある"
+            "title": "とある"
           }
         },
         {
           "match": {
-            "author_yomi": "かまち"
+            "author": "夏目漱石"
           }
         }
       ]
@@ -194,14 +212,12 @@ POST /books/_search
       "must_not": [
         {
           "match": {
-            "title_yomi": "京都"
+            "title": "京都"
           }
-        }
-      ],
-      "must": [
+        },
         {
           "match": {
-            "title_yomi": "とある"
+            "title": "ドラゴンクエスト"
           }
         }
       ]
@@ -209,13 +225,3 @@ POST /books/_search
   }
 }
 
-
-# ソート
-
-POST /books/_search
-{
-  "query": {
-    "match": "とある"
-  },
-  "sort": "title_yomi"
-}

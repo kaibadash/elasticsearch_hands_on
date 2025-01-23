@@ -23,7 +23,7 @@
 
 ## 今日覚えて帰ること
 
-Elasticsearch(NG: ElasticSearch, Elastic Search) には
+**Elasticsearch** (NG: ElasticSearch, Elastic Search) には
 
 - `json` で探したいものを入れ
 - `json` でクエリを組み
@@ -122,7 +122,7 @@ WHERE
 # ハンズオン
 
 - 本の検索サービス
-- id, title, author, title_yomi, author_yomi を持つ
+- id, title, author, title_yomi, author_yomi をいれて検索する例
 
 ---
 
@@ -170,7 +170,10 @@ Google が一般的になりすぎて **「Google みたいにして！」** っ
 - ヒットするようにしたよ => ゴミがヒットする!
 - ゴミがヒットしないようにしたよ => ヒットしない!
 
-** そうだ テスト書こう **
+このへんの曖昧な仕様が「Google みたいに検索」という要件で落ちてくる。
+
+**そうだ テスト書こう**
+Docker で Elasticsearch を立ててそれにリクエストするテスト。
 
 ---
 
@@ -193,11 +196,11 @@ Google が一般的になりすぎて **「Google みたいにして！」** っ
 
 ---
 
-## 検索だけじゃない
+## 検索だけじゃない色々できる
 
-- Amazon みたいな関連商品リコメンド
+- ベクトル検索で Amazon みたいな関連商品リコメンド
 - グルーピングして集計
-- json には RDB のような関連はないが関連を表現したい
+- json には RDB のような関連はないが親子関係を表現
 - word や PDF や画像の検索もしたい
 
 ---
@@ -208,3 +211,4 @@ Google が一般的になりすぎて **「Google みたいにして！」** っ
 
 `match` を覚えたぐらいでいい気になるなよ ♠
 Elasticsearch は奥が深い(ﾎﾞﾎﾞﾎﾞ…)
+続きは[検索だけじゃない Elasticsearch 入門+](https://kaiba.booth.pm/items/1031664)でぜひ!
