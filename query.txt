@@ -1,0 +1,227 @@
+# books index 作成(RDB でいうテーブルのようなもの)
+
+DELETE /books
+PUT /books
+{
+  "settings": {
+    "index": {
+      "analysis": {
+        "tokenizer": {
+          "ja_tokenizer": {
+            "type": "kuromoji_tokenizer"
+          }
+        },
+        "analyzer": {
+          "ja_analyzer": {
+            "type": "custom",
+            "tokenizer": "ja_tokenizer"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "copy_to": [
+          "title_ja",
+          "title_suggestion"
+        ]
+      },
+      "title_ja": {
+        "type": "text",
+        "analyzer": "ja_analyzer"
+      },
+      "title_yomi": {
+        "type": "text",
+        "copy_to": [
+          "title_yomi_suggestion"
+        ]
+      },
+      "author": {
+        "type": "text",
+        "copy_to": [
+          "author_ja",
+          "author_suggestion"
+        ]
+      },
+      "author_ja": {
+        "type": "text",
+        "analyzer": "ja_analyzer",
+        "search_analyzer": "ja_analyzer"
+      },
+      "author_yomi": {
+        "type": "text",
+        "copy_to": [
+          "author_yomi_suggestion"
+        ]
+      }
+    }
+  }
+}
+GET /books/_analyze
+{
+  "field": "title_ja",
+  "text": "京都府"
+}
+
+
+# books document 挿入(RDB でいうレコード)
+
+PUT /books/_doc/1
+{
+  "title": "吾輩は猫である",
+  "author": "夏目漱石",
+  "title_yomi": "わがはいはねこである",
+  "author_yomi": "なつめそうせき"
+}
+PUT /books/_doc/2
+{
+  "title": "とある科学の超電磁砲",
+  "author": "鎌池和馬",
+  "title_yomi": "とあるかがくのれーるがん",
+  "author_yomi": "かまちかずま"
+}
+
+PUT /books/_doc/3
+{
+  "title": "頭文字D",
+  "author": "しげの秀一",
+  "title_yomi": "いにしゃるでぃー",
+  "author_yomi": "しげのしゅういち"
+}
+
+PUT /books/_doc/4
+{
+  "title": "東京都府中市の歴史",
+  "author": "府中市教育委員会",
+  "title_yomi": "とうきょうとふちゅうしのれきし",
+  "author_yomi": "ふちゅうしきょういくいいんかい"
+}
+
+PUT /books/_doc/5
+{
+  "title": "とある京都府中京警察署の成果２０２４",
+  "author": "不明",
+  "title_yomi": "とあるきょうとふなかぎょうけいさつしょのせいか２０２４",
+  "author_yomi": "ふめい"
+}
+PUT /books/_doc/6
+{
+  "title": "ドラゴンクエスト3攻略本 そしてとある伝説へ",
+  "author": "鳥山明日",
+  "title_yomi": "どらごんくえすと3こうりゃくぼん そしてとあるでんせつへ",
+  "author_yomi": "とりやまあした"
+}
+
+# 好きな本を追加してみよう！
+
+# 検索: シンプルな全文検索
+
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title": "猫"
+    }
+  }
+}
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title_yomi": "ねこ"
+    }
+  }
+}
+
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title": "京都府"
+    }
+  }
+}
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title_ja": "京都府"
+    }
+  }
+}
+POST /books/_search
+{
+  "query": {
+    "match": {
+      "title_ja": "府中"
+    }
+  }
+}
+
+
+# 検索: AND
+POST /books/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": "とある"
+          }
+        },
+        {
+          "match": {
+            "author": "鎌池"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 検索: OR
+POST /books/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": "とある"
+          }
+        },
+        {
+          "match": {
+            "author": "夏目漱石"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# 検索: NOT
+POST /books/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "match": {
+            "title": "京都"
+          }
+        },
+        {
+          "match": {
+            "title": "ドラゴンクエスト"
+          }
+        }
+      ]
+    }
+  }
+}
+

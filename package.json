@@ -1,0 +1,14 @@
+{
+  "name": "elasticsearch_hands_on",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:kaibadash/elasticsearch_hands_on.git",
+  "author": "kaiba <kaibadash@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@marp-team/marp-cli": "^4.1.1"
+  },
+  "scripts": {
+    "pdf": "marp presentation.md --pdf --allow-local-files"
+  }
+}
